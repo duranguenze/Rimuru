@@ -32,21 +32,44 @@
 			console.log(event);
 		}
 		function beginSliding(e) {
-			slider.onpointermove = slide;
-			beginSliding.Start=e
-			slider.setPointerCapture(e.pointerId);
+            if(!(e instanceof TouchEvent)){
+    			slider.onpointermove = slide;
+    			beginSliding.Start=e
+    			slider.setPointerCapture(e.pointerId);
+            }else
+                beginSliding.StartTouch=e;
 		}
 
 		function stopSliding(e) {
-			slider.onpointermove = null;
-			slider.releasePointerCapture(e.pointerId);
+            if(!(e instanceof TouchEvent)){
+    			slider.onpointermove = null;
+    			slider.releasePointerCapture(e.pointerId);
+            }else
+                beginSliding.StartTouch=null;
 		}
 		function slide(e) {
-			let Distancia=Math.abs(e.clientX- beginSliding.Start.clientX)%360;
+            let Distancia=0;
+            if(e instanceof TouchEvent){
+                Distancia=Math.abs(e.touches['0'].screenX- beginSliding.StartTouch.touches['0'].screenX)%360;
+            }else{
+                Distancia=Math.abs(e.clientX- beginSliding.Start.clientX)%360;
+            }
 			slider.style.filter = 'hue-rotate('+Distancia+'deg)';
 		}
+		function startup() {
+            var el = document.getElementsByTagName("canvas")[0];
+            el.addEventListener("touchstart",
+             handleStart, false);
+            el.addEventListener("touchend", handleEnd, false);
+            el.addEventListener("touchcancel", handleCancel, false);
+            el.addEventListener("touchleave", handleLeave, false);
+            el.addEventListener("touchmove", handleMove, false);
+        }
 		const slider = document.getElementById('slimo');
 		slider.onpointerdown = beginSliding;
 		slider.onpointerup = stopSliding;
+		slider.addEventListener("touchstart", beginSliding, false);
+        slider.addEventListener("touchend", stopSliding, false);
+        slider.addEventListener("touchmove", slide, false);
 	</script>
 </html>
